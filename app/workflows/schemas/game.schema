@@ -1,0 +1,41 @@
+{
+    "type": "object",
+    "description": "Schema to represent payloads for tic tac toe game board",
+    "properties": {
+        "game": {
+            "description": "A game board, 3 rows 3 columns, grouped by rows",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/row"
+            },
+            "minItems": 3,
+            "maxItems": 3
+        }
+    },
+    "definitions": {
+        "position": {
+            "description": "Posible position on a board, 2 players represented by 0,1 or null for nobody",
+            "anyOf": [
+                {
+                    "type": "number",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "row": {
+            "description": "A row on a board represented by the 3 positions, left to right",
+            "type": "array",
+            "items": { 
+                "$ref": "#/definitions/position" 
+            },
+            "minItems": 3,
+            "maxItems": 3
+        }
+    }
+}
