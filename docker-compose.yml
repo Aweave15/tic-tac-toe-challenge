@@ -8,6 +8,7 @@ services:
     depends_on:
       - redis
     environment:
+      - APP_NAME=tic-tac-toe
       - REDIS_HOST=redis
       - REDIS_PORT=6379
 

@@ -20,7 +20,7 @@ COPY app /app/
 EXPOSE 5000
 
 WORKDIR /app
-ENTRYPOINT [ "python" ]
-CMD [ "/app/app.py" ]
+CMD ["python", "app.py"]
+
 
  
