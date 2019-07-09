@@ -1,8 +1,7 @@
 from redis import Redis
-import uuid
-import ast
 from collections import namedtuple
 from core import settings
+import uuid
 import json
 
 PIECES = 'XO'
