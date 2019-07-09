@@ -25,7 +25,7 @@ class GameHandler(Resource, GameBag):
             return jsonify(
                 {
                     'game_id': game.get_id(),
-                    'game_board':game.get_board()
+                    'game_board': game.get_board()
                 }
             )
         return Response(f'{game_id} is not an existing game', 404)
