@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "description": "Schema to represent payloads for tic tac toe players on game creation",
+    "properties": {
+        "players": {
+            "description": "players of a game are composed of a list of 2 player names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true
+        }
+    },
+    "required": ["players"],
+    "additionalProperties": false
+}

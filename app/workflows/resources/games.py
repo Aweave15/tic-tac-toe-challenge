@@ -1,68 +1,71 @@
 from flask_restful import Resource
-from flask import (
-    jsonify,
-    request,
-    Response,
-    g
-)
-import json
+from flask import jsonify, request, Response
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from workflows.lib.models import GameBag
+import json
 
-def get_schema():
+from workflows.lib.models import GameBag, IllegalGameMoveException
+
+def get_game_schema():
     with open('workflows/schemas/game.schema') as f_in:
         return json.load(f_in)
 
-class GameBagResource:
-    '''
-    Allow the game bag to be globally accessible as all resources will use it
-    '''
-    def get_game_bag(self):
-        if 'game_bag' in g:
-            return g.game_bag
-        g.game_bag = GameBag()
-        return g.game_bag
+def get_players_schema():
+    with open('workflows/schemas/players.schema') as f_in:
+        return json.load(f_in)
 
 
-class GameHandler(Resource, GameBagResource):
+class GameHandler(Resource, GameBag):
 
     methods = ['POST', 'GET']
 
     def get(self, game_id):
-        if self.get_game_bag().has_game(game_id):
+        game = self.get_game(game_id)
+        if game:
             return jsonify(
                 {
-                    'game_id': game_id,
-                    'game_board':self.get_game_bag().get_game_board(game_id)
+                    'game_id': game.get_id(),
+                    'game_board':game.get_board()
                 }
             )
         return Response(f'{game_id} is not an existing game', 404)
 
     def post(self, game_id):
         data = request.get_json()
-        if self.get_game_bag().has_game(game_id):
+        if self.has_game(game_id):
             try:
-                validate(instance=data, schema=get_schema())
+                validate(instance=data, schema=get_game_schema())
             except ValidationError as validation_error:
                 return Response(validation_error.message, 400)
-            self.get_game_bag().update_game(game_id, data.get('game'))
-            return jsonify({'status': 'Ok', 'game_id': game_id})
+
+            # update game
+            try:
+                updated_game = self.update_game(game_id, data.get('game_board'))
+                return jsonify({'status': 'Updated', 'game_id': updated_game.get_id(), 'game_board': updated_game.get_board()})
+            except IllegalGameMoveException as illegal_game_move_exception:
+                return Response(illegal_game_move_exception.args, 400)
         else:
             return Response(f'{game_id} is not an existing game', 400)
 
 
-class GameBagHandler(Resource, GameBagResource):
+class GameBagHandler(Resource, GameBag):
     methods = ['POST', 'GET']
 
     def get(self):
-        games = [{'game_id': game.id, 'game_board': game.board} for game in self.get_game_bag().get_all_games()]
+        games = self.get_games()
+        filtered = [{'game_id': g.get_id(), 'game_board': g.get_board()} for g in games]
         return jsonify({
-            'games': games
+            'games': filtered
         })
 
     def post(self):
-        game_id = self.get_game_bag().create_game()
+        data = request.get_json()
+        try:
+            validate(instance=data, schema=get_players_schema())
+        except ValidationError as validation_error:
+            return Response(validation_error.message, 400)
+        game = self.create_game(data.get('players'))
         return jsonify({
-            'game': game_id
+            'game_id': game.get_id(),
+            'players': game.get_players()
         })
