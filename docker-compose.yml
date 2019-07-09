@@ -13,4 +13,4 @@ services:
       - REDIS_PORT=6379
 
   redis:
-    image: redis  
+    image: redis
