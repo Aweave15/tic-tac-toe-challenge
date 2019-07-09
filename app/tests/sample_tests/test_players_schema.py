@@ -18,7 +18,7 @@ def test_one_player(client):
     response = client.post('api/games/', data=json.dumps(data), content_type='application/json')
     assert response.status_code == 400
 
-def test_one_player(client):
+def test_three_player(client):
     data = {
         'players': ['player1', 'player2', 'player3']
     }
